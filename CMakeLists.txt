@@ -200,8 +200,8 @@ include_directories(third_party/host_memory/include)
 
 add_subdirectory(third_party/cmrc)
 
-set(BOOST_ROOT "${CMAKE_SOURCE_DIR}/third_party/boost")
-set(Boost_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/third_party/boost")
+set(BOOST_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/third_party/boost")
+set(Boost_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third_party/boost")
 set(Boost_NO_SYSTEM_PATHS ON)
 add_compile_definitions(BOOST_NO_CXX98_FUNCTION_BASE) # Forbid Boost from using std::unary_function (Fixes MacOS build)
 

@@ -1,9 +1,11 @@
 #include <libretro.h>
 
+#include <cstring>
 #include <cstdio>
 #include <regex>
 
 #include "emulator.hpp"
+#include "memory.hpp"
 #include "renderer_gl/renderer_gl.hpp"
 #include "version.hpp"
 
@@ -271,6 +273,18 @@ void retro_init() {
 
 void retro_deinit() { emulator = nullptr; }
 
+static void setupMemoryMaps() {
+	retro_memory_descriptor descs[1] = {};
+	std::memset(descs, 0, sizeof(descs));
+
+	descs[0].ptr   = emulator->getMemory().getFCRAM();
+	descs[0].start = PhysicalAddrs::FCRAM;
+	descs[0].len   = Memory::FCRAM_SIZE;
+
+	retro_memory_map memmap = {descs, 1};
+	envCallback(RETRO_ENVIRONMENT_SET_MEMORY_MAPS, &memmap);
+}
+
 bool retro_load_game(const retro_game_info* game) {
 	configInit();
 	configUpdate();
@@ -285,7 +299,11 @@ bool retro_load_game(const retro_game_info* game) {
 	inputInit();
 	videoInit();
 
-	return emulator->loadROM(game->path);
+	bool loaded = emulator->loadROM(game->path);
+	if (loaded) {
+		setupMemoryMaps();
+	}
+	return loaded;
 }
 
 bool retro_load_game_special(uint type, const retro_game_info* info, usize num) { return false; }
