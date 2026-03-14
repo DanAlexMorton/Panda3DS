@@ -66,12 +66,19 @@ static bool setHWRender(retro_hw_context_type type) {
 			}
 			break;
 		case RETRO_HW_CONTEXT_OPENGLES3:
+			hwRender.version_major = 3;
+			hwRender.version_minor = 0;
+
+			if (envCallback(RETRO_ENVIRONMENT_SET_HW_RENDER, &hwRender)) {
+				usingGLES = true;
+				return true;
+			}
+			break;
 		case RETRO_HW_CONTEXT_OPENGL:
 			hwRender.version_major = 3;
 			hwRender.version_minor = 1;
 
 			if (envCallback(RETRO_ENVIRONMENT_SET_HW_RENDER, &hwRender)) {
-				usingGLES = true;
 				return true;
 			}
 			break;
