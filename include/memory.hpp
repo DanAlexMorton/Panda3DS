@@ -249,6 +249,7 @@ class Memory {
 
 	u32 getLinearHeapVaddr();
 	u8* getFCRAM() { return fcram; }
+	u8* getVRAM() { return vram; }
 
 	enum class BatteryLevel {
 		Empty = 0,

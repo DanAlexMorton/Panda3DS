@@ -14,6 +14,7 @@ static retro_video_refresh_t videoCallback;
 static retro_audio_sample_batch_t audioBatchCallback;
 static retro_input_poll_t inputPollCallback;
 static retro_input_state_t inputStateCallback;
+static retro_log_printf_t logCallback;
 
 static retro_hw_render_callback hwRender;
 static std::filesystem::path savePath;
@@ -247,7 +248,14 @@ void retro_get_system_av_info(retro_system_av_info* info) {
 	info->timing.sample_rate = 32768;
 }
 
-void retro_set_environment(retro_environment_t cb) { envCallback = cb; }
+void retro_set_environment(retro_environment_t cb) {
+	envCallback = cb;
+
+	struct retro_log_callback log;
+	if (cb(RETRO_ENVIRONMENT_GET_LOG_INTERFACE, &log)) {
+		logCallback = log.log;
+	}
+}
 void retro_set_video_refresh(retro_video_refresh_t cb) { videoCallback = cb; }
 void retro_set_audio_sample_batch(retro_audio_sample_batch_t cb) { audioBatchCallback = cb; }
 
@@ -274,14 +282,18 @@ void retro_init() {
 void retro_deinit() { emulator = nullptr; }
 
 static void setupMemoryMaps() {
-	retro_memory_descriptor descs[1] = {};
+	retro_memory_descriptor descs[2] = {};
 	std::memset(descs, 0, sizeof(descs));
 
 	descs[0].ptr   = emulator->getMemory().getFCRAM();
 	descs[0].start = PhysicalAddrs::FCRAM;
 	descs[0].len   = Memory::FCRAM_SIZE;
 
-	retro_memory_map memmap = {descs, 1};
+	descs[1].ptr   = emulator->getMemory().getVRAM();
+	descs[1].start = PhysicalAddrs::VRAM;
+	descs[1].len   = PhysicalAddrs::VRAMEnd - PhysicalAddrs::VRAM + 1;
+
+	retro_memory_map memmap = {descs, 2};
 	envCallback(RETRO_ENVIRONMENT_SET_MEMORY_MAPS, &memmap);
 }
 
