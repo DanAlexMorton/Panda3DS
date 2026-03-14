@@ -3,6 +3,7 @@
 #include <cstring>
 #include <cstdio>
 #include <regex>
+#include <vector>
 
 #include "emulator.hpp"
 #include "memory.hpp"
@@ -156,30 +157,30 @@ static int fetchVariableRange(std::string key, int min, int max) { return std::c
 
 static void configInit() {
 	static const retro_variable values[] = {
-		{"panda3ds_use_fastmem", EmulatorConfig::enableFastmemDefault ? "Enable fastmem; enabled|disabled" : "Enable fastmem; disabled|enabled"},
-		{"panda3ds_use_shader_jit", EmulatorConfig::shaderJitDefault ? "Enable shader JIT; enabled|disabled" : "Enable shader JIT; disabled|enabled"},
-		{"panda3ds_accelerate_shaders",
+		{"trident_use_fastmem", EmulatorConfig::enableFastmemDefault ? "Enable fastmem; enabled|disabled" : "Enable fastmem; disabled|enabled"},
+		{"trident_use_shader_jit", EmulatorConfig::shaderJitDefault ? "Enable shader JIT; enabled|disabled" : "Enable shader JIT; disabled|enabled"},
+		{"trident_accelerate_shaders",
 		 EmulatorConfig::accelerateShadersDefault ? "Run 3DS shaders on the GPU; enabled|disabled" : "Run 3DS shaders on the GPU; disabled|enabled"},
-		{"panda3ds_accurate_shader_mul", "Enable accurate shader multiplication; disabled|enabled"},
-		{"panda3ds_use_ubershader", EmulatorConfig::ubershaderDefault ? "Use ubershaders (No stutter, maybe slower); enabled|disabled"
+		{"trident_accurate_shader_mul", "Enable accurate shader multiplication; disabled|enabled"},
+		{"trident_use_ubershader", EmulatorConfig::ubershaderDefault ? "Use ubershaders (No stutter, maybe slower); enabled|disabled"
 																	  : "Use ubershaders (No stutter, maybe slower); disabled|enabled"},
-		{"panda3ds_use_vsync", "Enable VSync; enabled|disabled"},
-		{"panda3ds_hash_textures", EmulatorConfig::hashTexturesDefault ? "Hash textures (Better graphics, maybe slower); enabled|disabled"
+		{"trident_use_vsync", "Enable VSync; enabled|disabled"},
+		{"trident_hash_textures", EmulatorConfig::hashTexturesDefault ? "Hash textures (Better graphics, maybe slower); enabled|disabled"
 																	   : "Hash textures (Better graphics, maybe slower); disabled|enabled"},
 
-		{"panda3ds_system_language", "System language; En|Fr|Es|De|It|Pt|Nl|Ru|Ja|Zh|Ko|Tw"},
-		{"panda3ds_dsp_emulation", "DSP emulation; HLE|LLE|Null"},
-		{"panda3ds_use_audio", EmulatorConfig::audioEnabledDefault ? "Enable audio; enabled|disabled" : "Enable audio; disabled|enabled"},
-		{"panda3ds_audio_volume", "Audio volume; 100|0|10|20|40|60|80|90|100|120|140|150|180|200"},
-		{"panda3ds_mute_audio", "Mute audio; disabled|enabled"},
-		{"panda3ds_enable_aac", "Enable AAC audio; enabled|disabled"},
+		{"trident_system_language", "System language; En|Fr|Es|De|It|Pt|Nl|Ru|Ja|Zh|Ko|Tw"},
+		{"trident_dsp_emulation", "DSP emulation; HLE|LLE|Null"},
+		{"trident_use_audio", EmulatorConfig::audioEnabledDefault ? "Enable audio; enabled|disabled" : "Enable audio; disabled|enabled"},
+		{"trident_audio_volume", "Audio volume; 100|0|10|20|40|60|80|90|100|120|140|150|180|200"},
+		{"trident_mute_audio", "Mute audio; disabled|enabled"},
+		{"trident_enable_aac", "Enable AAC audio; enabled|disabled"},
 
-		{"panda3ds_ubershader_lighting_override", "Force shadergen when rendering lights; enabled|disabled"},
-		{"panda3ds_ubershader_lighting_override_threshold", "Light threshold for forcing shadergen; 1|2|3|4|5|6|7|8"},
-		{"panda3ds_use_virtual_sd", "Enable virtual SD card; enabled|disabled"},
-		{"panda3ds_write_protect_virtual_sd", "Write protect virtual SD card; disabled|enabled"},
-		{"panda3ds_battery_level", "Battery percentage; 5|10|20|30|50|70|90|100"},
-		{"panda3ds_use_charger", "Charger plugged; enabled|disabled"},
+		{"trident_ubershader_lighting_override", "Force shadergen when rendering lights; enabled|disabled"},
+		{"trident_ubershader_lighting_override_threshold", "Light threshold for forcing shadergen; 1|2|3|4|5|6|7|8"},
+		{"trident_use_virtual_sd", "Enable virtual SD card; enabled|disabled"},
+		{"trident_write_protect_virtual_sd", "Write protect virtual SD card; disabled|enabled"},
+		{"trident_battery_level", "Battery percentage; 5|10|20|30|50|70|90|100"},
+		{"trident_use_charger", "Charger plugged; enabled|disabled"},
 		{nullptr, nullptr},
 	};
 
@@ -190,28 +191,28 @@ static void configUpdate() {
 	EmulatorConfig& config = emulator->getConfig();
 
 	config.rendererType = RendererType::OpenGL;
-	config.vsyncEnabled = fetchVariableBool("panda3ds_use_vsync", true);
-	config.shaderJitEnabled = fetchVariableBool("panda3ds_use_shader_jit", EmulatorConfig::shaderJitDefault);
-	config.fastmemEnabled = fetchVariableBool("panda3ds_use_fastmem", EmulatorConfig::enableFastmemDefault);
-	config.systemLanguage = EmulatorConfig::languageCodeFromString(fetchVariable("panda3ds_system_language", "en"));
-	config.chargerPlugged = fetchVariableBool("panda3ds_use_charger", true);
-	config.batteryPercentage = fetchVariableRange("panda3ds_battery_level", 5, 100);
+	config.vsyncEnabled = fetchVariableBool("trident_use_vsync", true);
+	config.shaderJitEnabled = fetchVariableBool("trident_use_shader_jit", EmulatorConfig::shaderJitDefault);
+	config.fastmemEnabled = fetchVariableBool("trident_use_fastmem", EmulatorConfig::enableFastmemDefault);
+	config.systemLanguage = EmulatorConfig::languageCodeFromString(fetchVariable("trident_system_language", "en"));
+	config.chargerPlugged = fetchVariableBool("trident_use_charger", true);
+	config.batteryPercentage = fetchVariableRange("trident_battery_level", 5, 100);
 
-	config.dspType = Audio::DSPCore::typeFromString(fetchVariable("panda3ds_dsp_emulation", "null"));
-	config.audioEnabled = fetchVariableBool("panda3ds_use_audio", false);
-	config.aacEnabled = fetchVariableBool("panda3ds_enable_aac", true);
-	config.audioDeviceConfig.muteAudio = fetchVariableBool("panda3ds_mute_audio", false);
-	config.audioDeviceConfig.volumeRaw = float(fetchVariableRange("panda3ds_audio_volume", 0, 200)) / 100.0f;
+	config.dspType = Audio::DSPCore::typeFromString(fetchVariable("trident_dsp_emulation", "null"));
+	config.audioEnabled = fetchVariableBool("trident_use_audio", false);
+	config.aacEnabled = fetchVariableBool("trident_enable_aac", true);
+	config.audioDeviceConfig.muteAudio = fetchVariableBool("trident_mute_audio", false);
+	config.audioDeviceConfig.volumeRaw = float(fetchVariableRange("trident_audio_volume", 0, 200)) / 100.0f;
 
-	config.sdCardInserted = fetchVariableBool("panda3ds_use_virtual_sd", true);
-	config.sdWriteProtected = fetchVariableBool("panda3ds_write_protect_virtual_sd", false);
-	config.accurateShaderMul = fetchVariableBool("panda3ds_accurate_shader_mul", false);
-	config.useUbershaders = fetchVariableBool("panda3ds_use_ubershader", EmulatorConfig::ubershaderDefault);
-	config.accelerateShaders = fetchVariableBool("panda3ds_accelerate_shaders", EmulatorConfig::accelerateShadersDefault);
-	config.hashTextures = fetchVariableBool("panda3ds_hash_textures", EmulatorConfig::hashTexturesDefault);
+	config.sdCardInserted = fetchVariableBool("trident_use_virtual_sd", true);
+	config.sdWriteProtected = fetchVariableBool("trident_write_protect_virtual_sd", false);
+	config.accurateShaderMul = fetchVariableBool("trident_accurate_shader_mul", false);
+	config.useUbershaders = fetchVariableBool("trident_use_ubershader", EmulatorConfig::ubershaderDefault);
+	config.accelerateShaders = fetchVariableBool("trident_accelerate_shaders", EmulatorConfig::accelerateShadersDefault);
+	config.hashTextures = fetchVariableBool("trident_hash_textures", EmulatorConfig::hashTexturesDefault);
 
-	config.forceShadergenForLights = fetchVariableBool("panda3ds_ubershader_lighting_override", true);
-	config.lightShadergenThreshold = fetchVariableRange("panda3ds_ubershader_lighting_override_threshold", 1, 8);
+	config.forceShadergenForLights = fetchVariableBool("trident_ubershader_lighting_override", true);
+	config.lightShadergenThreshold = fetchVariableRange("trident_ubershader_lighting_override_threshold", 1, 8);
 	config.discordRpcEnabled = false;
 
 	// Handle any settings that might need the emulator core to be notified when they're changed, and save the config.
@@ -232,7 +233,7 @@ void retro_get_system_info(retro_system_info* info) {
 	info->need_fullpath = true;
 	info->valid_extensions = "3ds|3dsx|elf|axf|cci|cxi|app";
 	info->library_version = PANDA3DS_VERSION;
-	info->library_name = "Panda3DS";
+	info->library_name = "Trident";
 	info->block_extract = false;
 }
 
@@ -281,19 +282,67 @@ void retro_init() {
 
 void retro_deinit() { emulator = nullptr; }
 
+static std::vector<retro_memory_descriptor> memoryDescs;
+
 static void setupMemoryMaps() {
-	retro_memory_descriptor descs[2] = {};
-	std::memset(descs, 0, sizeof(descs));
+	Memory& mem = emulator->getMemory();
+	memoryDescs.clear();
 
-	descs[0].ptr   = emulator->getMemory().getFCRAM();
-	descs[0].start = PhysicalAddrs::FCRAM;
-	descs[0].len   = Memory::FCRAM_SIZE;
+	// Walk the 3DS virtual address space (0x00000000 - 0x3FFFFFFF) via page tables
+	// and build one descriptor per contiguous physically-backed range.
+	// This aligns with the virtual-address-based memory map proposed in
+	// rcheevos PR #446, making game pointers map 1:1 to RA addresses.
+	constexpr u32 pageSize = 0x1000;
+	constexpr u32 endAddr = 0x40000000;
+	constexpr u32 totalPages = endAddr / pageSize;
 
-	descs[1].ptr   = emulator->getMemory().getVRAM();
-	descs[1].start = PhysicalAddrs::VRAM;
-	descs[1].len   = PhysicalAddrs::VRAMEnd - PhysicalAddrs::VRAM + 1;
+	u32 rangeStartAddr = 0;
+	uintptr_t rangeNextPtr = 0;
+	bool inRange = false;
 
-	retro_memory_map memmap = {descs, 2};
+	for (u32 page = 0; page < totalPages; page++) {
+		u32 vaddr = page * pageSize;
+		void* ptr = mem.getReadPointer(vaddr);
+
+		if (ptr && inRange && (uintptr_t)ptr == rangeNextPtr) {
+			rangeNextPtr += pageSize;
+		} else {
+			if (inRange) {
+				retro_memory_descriptor desc = {};
+				std::memset(&desc, 0, sizeof(desc));
+				u32 rangeLen = vaddr - rangeStartAddr;
+				desc.ptr   = (void*)(rangeNextPtr - rangeLen);
+				desc.start = rangeStartAddr;
+				desc.len   = rangeLen;
+				memoryDescs.push_back(desc);
+			}
+
+			if (ptr) {
+				rangeStartAddr = vaddr;
+				rangeNextPtr = (uintptr_t)ptr + pageSize;
+				inRange = true;
+			} else {
+				inRange = false;
+			}
+		}
+	}
+
+	if (inRange) {
+		retro_memory_descriptor desc = {};
+		std::memset(&desc, 0, sizeof(desc));
+		u32 rangeLen = endAddr - rangeStartAddr;
+		desc.ptr   = (void*)(rangeNextPtr - rangeLen);
+		desc.start = rangeStartAddr;
+		desc.len   = rangeLen;
+		memoryDescs.push_back(desc);
+	}
+
+	if (logCallback) {
+		logCallback(RETRO_LOG_INFO, "[Trident] Memory map: %u descriptors covering virtual address space\n",
+			(unsigned)memoryDescs.size());
+	}
+
+	retro_memory_map memmap = {memoryDescs.data(), (unsigned)memoryDescs.size()};
 	envCallback(RETRO_ENVIRONMENT_SET_MEMORY_MAPS, &memmap);
 }
 
