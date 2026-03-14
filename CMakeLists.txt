@@ -655,13 +655,13 @@ if(ENABLE_METAL AND APPLE)
 
     set(RENDERER_MTL_HOST_SHADERS_SOURCES)
     function (add_metal_shader SHADER)
-        set(SHADER_SOURCE "${CMAKE_SOURCE_DIR}/src/host_shaders/${SHADER}.metal")
-        set(SHADER_IR "${CMAKE_SOURCE_DIR}/src/host_shaders/${SHADER}.ir")
-        set(SHADER_METALLIB "${CMAKE_SOURCE_DIR}/src/host_shaders/${SHADER}.metallib")
+        set(SHADER_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/src/host_shaders/${SHADER}.metal")
+        set(SHADER_IR "${CMAKE_CURRENT_SOURCE_DIR}/src/host_shaders/${SHADER}.ir")
+        set(SHADER_METALLIB "${CMAKE_CURRENT_SOURCE_DIR}/src/host_shaders/${SHADER}.metallib")
 
         # MacOS, iOS and the iOS simulator all use different compilation options for shaders
         set(MetalSDK "macosx")
-        if(IOS)
+        if(CMAKE_SYSTEM_NAME STREQUAL "iOS")
             if (IOS_SIMULATOR_BUILD)
                 set(MetalSDK "iphonesimulator")
             else()
@@ -680,7 +680,7 @@ if(ENABLE_METAL AND APPLE)
             COMMAND xcrun -sdk ${MetalSDK} metallib -o ${SHADER_METALLIB} ${SHADER_IR}
             DEPENDS ${SHADER_IR}
             VERBATIM)
-        set(RENDERER_MTL_HOST_SHADERS_SOURCES ${RENDERER_MTL_HOST_SHADERS_SOURCES} ${SHADER_METALLIB})
+        set(RENDERER_MTL_HOST_SHADERS_SOURCES ${RENDERER_MTL_HOST_SHADERS_SOURCES} ${SHADER_METALLIB} PARENT_SCOPE)
     endfunction()
 
     add_metal_shader(metal_shaders)
